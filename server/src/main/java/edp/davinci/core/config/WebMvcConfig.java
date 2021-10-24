@@ -23,13 +23,12 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.webank.wedatasphere.dss.standard.app.sso.plugin.filter.UserInterceptor;
 import edp.core.inteceptor.RequestJsonHandlerArgumentResolver;
+import edp.core.utils.TokenUtils;
 import edp.davinci.core.common.Constants;
 import edp.davinci.core.filter.DSSOriginSSOFilter;
-import edp.davinci.core.inteceptor.AuthenticationInterceptor;
-import edp.davinci.core.inteceptor.CurrentPlatformMethodArgumentResolver;
-import edp.davinci.core.inteceptor.CurrentUserMethodArgumentResolver;
-import edp.davinci.core.inteceptor.PlatformAuthInterceptor;
+import edp.davinci.core.inteceptor.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -40,15 +39,13 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
-import scala.Boolean;
-import scala.math.BigDecimal;
 
+import javax.servlet.FilterConfig;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import static edp.core.consts.Consts.EMPTY;
-
 
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
@@ -181,12 +178,22 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 
 
     @Bean
-    public FilterRegistrationBean registerFilter() {
+    public FilterRegistrationBean registerFilter(DSSOriginSSOFilter dssOriginSSOFilter) {
         FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(new DSSOriginSSOFilter());
+        registration.setFilter(dssOriginSSOFilter);
         registration.addUrlPatterns("/*");
         registration.setName("DSSOriginSSOFilter");
         registration.setOrder(1);
         return registration;
+    }
+
+    @Bean
+    public DSSOriginSSOFilter createDSSOriginSSOFilter(){
+        return new DSSOriginSSOFilter();
+    }
+
+    @Bean
+    public UserInterceptor getUserInterceptor(TokenUtils tokenUtils) {
+        return new WTSSHttpRequestUserInterceptor(tokenUtils);
     }
 }

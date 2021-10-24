@@ -16,9 +16,9 @@
  */
 package com.webank.wedatasphere.dss.visualis.entrance.spark
 
+import com.webank.wedatasphere.linkis.entrance.job.EntranceExecuteRequest
 import com.webank.wedatasphere.linkis.entrance.persistence.{PersistenceEngine, QueryPersistenceManager, ResultSetEngine}
 import com.webank.wedatasphere.linkis.scheduler.executer.OutputExecuteResponse
-import com.webank.wedatasphere.linkis.scheduler.queue.Job
 import javax.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -38,12 +38,12 @@ class VisualisPersistenceManager extends QueryPersistenceManager {
     this.setPersistenceEngine(pEngine)
     this.setResultSetEngine(rEngine)
   }
-  override def onResultSetCreated(job: Job, response: OutputExecuteResponse): Unit = {
-    job match {
+  override def onResultSetCreated(request: EntranceExecuteRequest, response: OutputExecuteResponse): Unit = {
+    request.getJob match {
       case j: VisualisJob => j.addResultSet(response.getOutput)
       case _ =>
     }
-    super.onResultSetCreated(job, response)
+    super.onResultSetCreated(request, response)
   }
 
 }

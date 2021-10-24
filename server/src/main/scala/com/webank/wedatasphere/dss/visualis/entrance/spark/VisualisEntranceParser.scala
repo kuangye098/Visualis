@@ -17,20 +17,24 @@
 package com.webank.wedatasphere.dss.visualis.entrance.spark
 
 import com.webank.wedatasphere.linkis.entrance.parser.CommonEntranceParser
-import com.webank.wedatasphere.linkis.protocol.query.RequestPersistTask
+import com.webank.wedatasphere.linkis.entrance.persistence.PersistenceManager
+import com.webank.wedatasphere.linkis.governance.common.entity.task.RequestPersistTask
 import com.webank.wedatasphere.linkis.protocol.task.Task
 import com.webank.wedatasphere.linkis.scheduler.queue.Job
 import org.springframework.stereotype.Component
+
 /**
   * Created by shanhuang on 2019/1/23.
   */
 @Component("entranceParser")
-class VisualisEntranceParser extends CommonEntranceParser {
+class VisualisEntranceParser(override val persistenceManager: PersistenceManager)
+       extends CommonEntranceParser(persistenceManager) {
 
-   override def parseToJob(task: Task): Job = {
+   def parseToJob(task: Task): Job = {
       task match {
-         case requestPersistTask:RequestPersistTask => val job = new VisualisJob
-            job.setTask(task)
+         case requestPersistTask:RequestPersistTask => val job = new VisualisJob(persistenceManager);
+         // job.setTask(task)
+            job.getErrorResponse.message
             job.setUser(requestPersistTask.getUmUser)
             job.setCreator(requestPersistTask.getRequestApplicationName)
             job.setEntranceListenerBus(getEntranceContext.getOrCreateEventListenerBus)

@@ -20,16 +20,16 @@ import java.util
 
 import com.webank.wedatasphere.linkis.common.utils.{Logging, Utils}
 import com.webank.wedatasphere.linkis.protocol.CacheableProtocol
-import com.webank.wedatasphere.linkis.protocol.config.{RequestQueryAppConfigWithGlobal, ResponseQueryConfig}
+import com.webank.wedatasphere.linkis.governance.common.protocol.conf.{RequestQueryGlobalConfig, ResponseQueryConfig}
 import com.webank.wedatasphere.linkis.rpc.RPCMapCache
 
 /**
   * Created by johnnwang on 2018/12/11.
   */
 object UserConfiguration  extends
-  RPCMapCache[RequestQueryAppConfigWithGlobal, String, String](VisualisUtils.CLOUD_CONSOLE_CONFIGURATION_SPRING_APPLICATION_NAME.getValue) with Logging{
+  RPCMapCache[RequestQueryGlobalConfig, String, String](VisualisUtils.CLOUD_CONSOLE_CONFIGURATION_SPRING_APPLICATION_NAME.getValue) with Logging{
 
-  override protected def createRequest(req: RequestQueryAppConfigWithGlobal): CacheableProtocol = {
+  override protected def createRequest(req: RequestQueryGlobalConfig): CacheableProtocol = {
     req
   }
 
@@ -37,7 +37,7 @@ object UserConfiguration  extends
     case response: ResponseQueryConfig => response.getKeyAndValue
   }
 
-  override def getCacheMap(key: RequestQueryAppConfigWithGlobal): util.Map[String, String] = {
+  override def getCacheMap(key: RequestQueryGlobalConfig): util.Map[String, String] = {
     Utils.tryCatch(super.getCacheMap(key)){case error:Throwable => warn(s"Failed to get Configuration:$key ", error)
     null
     }

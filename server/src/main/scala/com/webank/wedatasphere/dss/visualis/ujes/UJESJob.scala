@@ -16,8 +16,6 @@
  */
 package com.webank.wedatasphere.dss.visualis.ujes
 
-import com.webank.wedatasphere.linkis.server.JMap
-
 /**
   * Created by johnnwang on 2019/1/26.
   */

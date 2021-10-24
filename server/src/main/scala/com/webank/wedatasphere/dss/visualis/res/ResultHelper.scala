@@ -24,7 +24,6 @@ import com.webank.wedatasphere.linkis.storage.resultset.{ResultSetFactory, Resul
 import com.webank.wedatasphere.dss.visualis.exception.VGErrorException
 import com.webank.wedatasphere.linkis.adapt.LinkisUtils
 import com.webank.wedatasphere.linkis.common.io.FsPath
-import com.webank.wedatasphere.linkis.server.BDPJettyServerHelper
 import org.json4s.DefaultFormats
 
 /**

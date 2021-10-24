@@ -17,6 +17,7 @@
 package com.webank.wedatasphere.dss.visualis.entrance.spark
 
 import com.webank.wedatasphere.linkis.entrance.job.EntranceExecutionJob
+import com.webank.wedatasphere.linkis.entrance.persistence.PersistenceManager
 import com.webank.wedatasphere.linkis.scheduler.queue.SchedulerEventState
 import com.webank.wedatasphere.linkis.scheduler.queue.SchedulerEventState.SchedulerEventState
 
@@ -24,7 +25,8 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Created by shanhuang on 2019/1/23.
   */
-class VisualisJob extends EntranceExecutionJob {
+class VisualisJob(val persistenceManager: PersistenceManager) extends EntranceExecutionJob(persistenceManager: PersistenceManager) {
+
   private val resultSets = ArrayBuffer[String]()
 
   def addResultSet(resultSet: String): Unit = resultSets += resultSet

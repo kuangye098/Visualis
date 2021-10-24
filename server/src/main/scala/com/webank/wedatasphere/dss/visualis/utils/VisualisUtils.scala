@@ -16,19 +16,11 @@
  */
 package com.webank.wedatasphere.dss.visualis.utils
 
-import java.awt.Image
-import java.awt.image.BufferedImage
-import java.io.File
-import java.util
-
 import com.webank.wedatasphere.linkis.common.conf.CommonVars
-import com.webank.wedatasphere.dss.visualis.configuration.CommonConfig
 import com.webank.wedatasphere.dss.visualis.model.DWCResultInfo
 import com.webank.wedatasphere.linkis.adapt.LinkisUtils
 import edp.core.model.BaseSource
-import edp.davinci.dao.ProjectMapper
 import edp.davinci.model.{Project, View}
-import javax.imageio.ImageIO
 
 /**
   * Created by johnnwang on 2019/1/23.

@@ -18,6 +18,7 @@ package com.webank.wedatasphere.dss.visualis.utils
 
 import com.webank.wedatasphere.dss.visualis.entrance.spark.VisualisEntranceParser
 import com.webank.wedatasphere.linkis.entrance.EntranceParser
+import com.webank.wedatasphere.linkis.entrance.persistence.PersistenceManager
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.{Bean, Configuration, Primary}
 
@@ -30,6 +31,7 @@ class VisualisSpringConfiguration {
   @Primary
   @Bean(Array("entranceParser"))
   @ConditionalOnMissingBean
-  def createEntranceParser(): EntranceParser = new VisualisEntranceParser
+  def createEntranceParser(persistenceManager: PersistenceManager):
+            EntranceParser = new VisualisEntranceParser(persistenceManager)
 
 }

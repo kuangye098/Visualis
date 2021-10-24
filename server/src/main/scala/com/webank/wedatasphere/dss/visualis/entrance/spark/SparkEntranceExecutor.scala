@@ -25,10 +25,9 @@ import com.webank.wedatasphere.linkis.common.utils.{Logging, Utils}
 import com.webank.wedatasphere.linkis.entrance.EntranceServer
 import com.webank.wedatasphere.linkis.entrance.exception.{EntranceRPCException, QueryFailedException}
 import com.webank.wedatasphere.linkis.protocol.constants.TaskConstant
-import com.webank.wedatasphere.linkis.protocol.query.{RequestPersistTask, RequestQueryTask, ResponsePersist}
 import com.webank.wedatasphere.linkis.rpc.Sender
 import com.webank.wedatasphere.linkis.scheduler.queue.SchedulerEventState
-import com.webank.wedatasphere.linkis.server.{BDPJettyServerHelper, JMap}
+import com.webank.wedatasphere.linkis.server.JMap
 import com.webank.wedatasphere.linkis.server.security.SecurityFilter
 import com.webank.wedatasphere.linkis.storage.FSFactory
 import com.webank.wedatasphere.linkis.storage.resultset.table.{TableMetaData, TableRecord}
@@ -39,27 +38,20 @@ import com.webank.wedatasphere.dss.visualis.res.ResultHelper
 import com.webank.wedatasphere.dss.visualis.ujes.UJESJob
 import com.webank.wedatasphere.dss.visualis.utils.VisualisUtils
 import com.webank.wedatasphere.linkis.adapt.LinkisUtils
+import com.webank.wedatasphere.linkis.governance.common.entity.task.{RequestPersistTask, RequestQueryTask, ResponsePersist}
 import edp.core.exception.{ServerException, SourceException}
 import edp.core.model._
 import edp.core.utils.SqlUtils
 import edp.davinci.model.Source
-import org.json4s._
-import org.json4s.jackson.Serialization.read
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.{Scope, ScopedProxyMode}
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.{RequestContextHolder, ServletRequestAttributes}
 
 import scala.collection.JavaConversions._
-import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.jackson.Serialization._
 import org.json4s._
-import org.json4s.jackson._
-import org.json4s.jackson.Serialization.{read, write}
+import org.json4s.jackson.Serialization.{read}
 import org.springframework.context.annotation.Scope
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.web.context.WebApplicationContext
 
 import scala.collection.JavaConversions
 
@@ -129,13 +121,10 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
       case job: VisualisJob =>
         job.waitForCompleted()
         if (!SchedulerEventState.isSucceed(job.getState)){
-          job.getTask match {
-            case t: RequestPersistTask =>
-              if(t.getErrCode != null && t.getErrDesc != null){
-                throw SparkEngineExecuteException(t.getErrCode, "spark engine run sql failed:" + t.getErrDesc)
-              }
-            case _ =>
-          }
+          val jobRequest = job.getJobRequest;
+          if(jobRequest.getErrorCode != null && jobRequest.getErrorDesc != null)
+                throw SparkEngineExecuteException(jobRequest.getErrorCode,
+                       "spark engine run sql failed:" + jobRequest.getErrorDesc)
           if(job.getErrorResponse != null){
             throw SparkEngineExecuteException(60001, job.getErrorResponse.message)
           }
@@ -202,7 +191,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
     * @param resultSet 结果集文件或结果集
     * @return
     */
-  private def getResultSet(resultSet: String): util.List[util.Map[String, AnyRef]] = {
+   def getResultSet(resultSet: String): util.List[util.Map[String, AnyRef]] = {
     info(s"$umUser began to get the result of execution :$resultSet")
     val rsFactory= ResultSetFactory.getInstance
     val res = new util.ArrayList[util.Map[String, AnyRef]]()
@@ -265,7 +254,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
     }
   }
 
-  override def querySQLWithResultSetLocation(sql: String, limit: Int) : Array[String] = {
+   override def querySQLWithResultSetLocation(sql: String, limit: Int) : Array[String] = {
 //    getHistoryQuery(sql).map(_.getResultLocation).map{l =>
 //      val fsPath = new FsPath(l)
 //      val fs = FSFactory.getFs(fsPath)
@@ -276,7 +265,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
 //      }
 //    }.filter(_.isEmpty).getOrElse(
       executeUntil(sql, { job =>
-      job.getTask match {
+      job.getJobRequest match {
         case t: RequestPersistTask => Array(t.getResultLocation + VisualisUtils.RESULT_FILE_NAME.getValue)
         case _ => Array()
       }
@@ -284,7 +273,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
     //)
   }
 
-  private def querySQLWithResultSetPaths(sql: String, limit: Int): Array[String] =
+   def querySQLWithResultSetPaths(sql: String, limit: Int): Array[String] =
   //TODO 需要与UJES那边兼容，考虑limit语法和全量导出功能
 //    getHistoryQuery(sql).map(_.getResultLocation).map{l =>
 //      val fsPath = new FsPath(l)
@@ -316,7 +305,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
       val columns = ResultHelper.getResultType(resultSets(resultSets.length - 1))
       paginateWithQueryColumns.setColumns(columns.map(col => new QueryColumn(col.columnName,col.dataType.typeName)).toList)
     }
-    return  paginateWithQueryColumns;
+    paginateWithQueryColumns
   }
 
   /**
@@ -326,7 +315,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
     * @return
     * @throws SourceException
     */
-  override def tableIsExist(tableName: String): Boolean = super.tableIsExist(tableName)
+   override def tableIsExist(tableName: String): Boolean = super.tableIsExist(tableName)
 
   /**
     * 根据sql查询列
@@ -335,7 +324,7 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
     * @return
     * @throws ServerException
     */
-  override def getColumns(sql: String): util.List[QueryColumn] = {
+   override def getColumns(sql: String): util.List[QueryColumn] = {
     val resultSets = querySQLWithResultSetPaths(sql, 2)
     if(resultSets.isEmpty) null else {
       val columns = ResultHelper.getResultType(resultSets(resultSets.length - 1))
@@ -343,11 +332,11 @@ class SparkEntranceExecutor extends SqlUtils with Logging{
     }
   }
 
-  override def testConnection(): Boolean = super.testConnection()
+   override def testConnection(): Boolean = super.testConnection()
 
-  override def jdbcTemplate(): JdbcTemplate = super.jdbcTemplate()
+   override def jdbcTemplate(): JdbcTemplate = super.jdbcTemplate()
 
-  override def executeBatch(sql: String, headers: util.Set[QueryColumn], datas: util.List[util.Map[String, AnyRef]]): Unit = super.executeBatch(sql, headers, datas)
+   override def executeBatch(sql: String, headers: util.Set[QueryColumn], datas: util.List[util.Map[String, AnyRef]]): Unit = super.executeBatch(sql, headers, datas)
 
   def getCurrentUser(): String ={
     val request = RequestContextHolder.getRequestAttributes().asInstanceOf[ServletRequestAttributes].getRequest

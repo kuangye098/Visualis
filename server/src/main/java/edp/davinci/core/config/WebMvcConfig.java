@@ -25,11 +25,13 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import edp.core.inteceptor.RequestJsonHandlerArgumentResolver;
 import edp.davinci.core.common.Constants;
+import edp.davinci.core.filter.DSSOriginSSOFilter;
 import edp.davinci.core.inteceptor.AuthenticationInterceptor;
 import edp.davinci.core.inteceptor.CurrentPlatformMethodArgumentResolver;
 import edp.davinci.core.inteceptor.CurrentUserMethodArgumentResolver;
 import edp.davinci.core.inteceptor.PlatformAuthInterceptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -178,4 +180,13 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     }
 
 
+    @Bean
+    public FilterRegistrationBean registerFilter() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new DSSOriginSSOFilter());
+        registration.addUrlPatterns("/*");
+        registration.setName("DSSOriginSSOFilter");
+        registration.setOrder(1);
+        return registration;
+    }
 }

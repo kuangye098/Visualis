@@ -227,11 +227,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.webank.wedatasphere.dss</groupId>
             <artifactId>dss-sso-integration-standard</artifactId>
             <version>${dss.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.webank.wedatasphere.dss</groupId>
             <artifactId>spring-origin-sso-integration-plugin</artifactId>

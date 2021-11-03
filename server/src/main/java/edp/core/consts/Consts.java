@@ -108,7 +108,7 @@ public class Consts {
     /**
      * Token 前缀
      */
-    public static final String TOKEN_PREFIX = "Bearer";
+    public static final String TOKEN_PREFIX = "Bearer ";
 
     /**
      * Token header名称
@@ -132,6 +132,9 @@ public class Consts {
 
 
     public static final String SCHEDULE_JOB_DATA_KEY = "scheduleJobs";
+
+
+    public static final String USER_TICKET_ID_STRING = "bdp-user-ticket-id";
 
     /**
      * 常用图片格式

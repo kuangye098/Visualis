@@ -67,7 +67,7 @@ public class TokenUtils {
      * @return
      */
     public String generateToken(TokenDetail tokenDetail) {
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put(Consts.TOKEN_USER_NAME, StringUtils.isEmpty(tokenDetail.getUsername()) ? EMPTY : tokenDetail.getUsername());
         claims.put(Consts.TOKEN_USER_PASSWORD, StringUtils.isEmpty(tokenDetail.getPassword()) ? EMPTY : tokenDetail.getPassword());
         claims.put(Consts.TOKEN_CREATE_TIME, System.currentTimeMillis());
@@ -95,7 +95,7 @@ public class TokenUtils {
      * @return
      */
     public String generateToken(TokenDetail tokenDetail, Long timeOutMillis) {
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put(Consts.TOKEN_USER_NAME, StringUtils.isEmpty(tokenDetail.getUsername()) ? EMPTY : tokenDetail.getUsername());
         claims.put(Consts.TOKEN_USER_PASSWORD, StringUtils.isEmpty(tokenDetail.getPassword()) ? EMPTY : tokenDetail.getPassword());
         claims.put(Consts.TOKEN_CREATE_TIME, System.currentTimeMillis());
@@ -197,6 +197,7 @@ public class TokenUtils {
             final Claims claims = getClaims(token);
             username = claims.get(Consts.TOKEN_USER_NAME).toString();
         } catch (Exception e) {
+            log.warn("Jwt get user name failed : " , e);
             username = null;
         }
         return username;
@@ -214,6 +215,7 @@ public class TokenUtils {
             final Claims claims = getClaims(token);
             password = claims.get(Consts.TOKEN_USER_PASSWORD).toString();
         } catch (Exception e) {
+            log.warn("Jwt get user password failed : " , e);
             password = null;
         }
         return password;

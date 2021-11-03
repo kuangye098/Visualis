@@ -23,6 +23,9 @@ import com.webank.wedatasphere.linkis.server.security.SecurityFilter;
 import edp.core.annotation.CurrentUser;
 import edp.core.consts.Consts;
 import edp.core.inteceptor.CurrentUserMethodArgumentResolverInterface;
+import edp.core.utils.TokenUtils;
+import edp.davinci.core.common.Constants;
+import edp.davinci.core.utils.CookieUtils;
 import edp.davinci.dao.UserMapper;
 import edp.davinci.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,9 @@ public class CurrentUserMethodArgumentResolver implements CurrentUserMethodArgum
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private TokenUtils tokenUtils;
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().isAssignableFrom(User.class)
@@ -54,7 +60,11 @@ public class CurrentUserMethodArgumentResolver implements CurrentUserMethodArgum
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         try
         {
-            return (User)userMapper.selectByUsername(SecurityFilter.getLoginUsername(webRequest.getNativeRequest(HttpServletRequest.class)));
+            return userMapper.selectByUsername(
+                    tokenUtils.getUsername(
+                            CookieUtils.getCookieValue(
+                                    webRequest.getNativeRequest(HttpServletRequest.class),
+                                    Constants.TOKEN_HEADER_STRING)));
         }catch (Throwable e){
             log.error("Failed to get user:",e);
             throw e;

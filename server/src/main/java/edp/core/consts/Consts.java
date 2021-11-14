@@ -108,7 +108,7 @@ public class Consts {
     /**
      * Token 前缀
      */
-    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String TOKEN_PREFIX = "Bearer";
 
     /**
      * Token header名称

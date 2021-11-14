@@ -1,15 +1,12 @@
 package edp.davinci.core.inteceptor;
 
 import com.webank.wedatasphere.dss.standard.app.sso.plugin.filter.HttpRequestUserInterceptor;
-import edp.core.consts.Consts;
+import com.webank.wedatasphere.linkis.server.security.SecurityFilter;
 import edp.core.utils.TokenUtils;
 import edp.davinci.core.common.Constants;
-import edp.davinci.model.User;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -33,41 +30,21 @@ public class WTSSHttpRequestUserInterceptor implements HttpRequestUserIntercepto
     }
 
     private HttpServletRequest createDssToken(final String username, final HttpServletRequest req) {
-        logger.info(username + " enters the createDssToken method");
+        logger.info(username + " enters the createDssToken method ,and ignore operation.");
 
-        String token      = CookieUtils.getCookieValue(req,Constants.TOKEN_HEADER_STRING);
+        String userTicketId = CookieUtils.getCookieValue(req,Constants.USER_TICKET_ID_STRING);
 
-        User user = new User();
-        user.setUsername(username);
-        String newToken = tokenUtils.generateToken(user);
-
-        if(token != null){
-            logger.info("visualis exists token,old token {},new token {} for user {}.", token, newToken, username);
-        } else{
-            logger.info("visualis new token {} for user {}.", newToken, username);
-        }
-
-        //TODO 暂时用于测试，将完善过期时间和跨域安全问题
-        final Cookie tokenCookie = new Cookie(Constants.TOKEN_HEADER_STRING, Consts.TOKEN_PREFIX + newToken);
-        tokenCookie.setPath("/");
-
-        final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper(req) {
-            @Override
-            public Cookie[] getCookies() {
-                final Cookie[] cookies = (Cookie[]) ArrayUtils.add(super.getCookies(), tokenCookie);
-                return cookies;
-            }
-        };
-        logger.info("dss new token {} for user {} .", newToken, username);
+        final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper(req);
+        logger.info("visualis userTicketId {} for user {} .", userTicketId,username);
         return httpServletRequestWrapper;
     }
 
     @Override
     public boolean isUserExistInSession(HttpServletRequest httpServletRequest) {
-        String token = CookieUtils.getCookieValue(httpServletRequest,Constants.TOKEN_HEADER_STRING);
-        logger.info("dss token {} ", token);
-        if (token != null && !token.isEmpty()) {
-            String username = tokenUtils.getUsername(token);
+        String userTicket = CookieUtils.getCookieValue(httpServletRequest,Constants.USER_TICKET_ID_STRING);
+        logger.info("dss userTicket {} ", userTicket);
+        if (userTicket != null && !userTicket.isEmpty()) {
+            String username = SecurityFilter.getLoginUsername(httpServletRequest);
             if(username == null){
                 return false;
             }

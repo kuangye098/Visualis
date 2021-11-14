@@ -21,11 +21,7 @@ package edp.davinci.core.inteceptor;
 
 import com.webank.wedatasphere.linkis.server.security.SecurityFilter;
 import edp.core.annotation.CurrentUser;
-import edp.core.consts.Consts;
 import edp.core.inteceptor.CurrentUserMethodArgumentResolverInterface;
-import edp.core.utils.TokenUtils;
-import edp.davinci.core.common.Constants;
-import edp.davinci.core.utils.CookieUtils;
 import edp.davinci.dao.UserMapper;
 import edp.davinci.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,9 +42,6 @@ public class CurrentUserMethodArgumentResolver implements CurrentUserMethodArgum
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private TokenUtils tokenUtils;
-
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().isAssignableFrom(User.class)
@@ -60,11 +52,7 @@ public class CurrentUserMethodArgumentResolver implements CurrentUserMethodArgum
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         try
         {
-            return userMapper.selectByUsername(
-                    tokenUtils.getUsername(
-                            CookieUtils.getCookieValue(
-                                    webRequest.getNativeRequest(HttpServletRequest.class),
-                                    Constants.TOKEN_HEADER_STRING)));
+            return userMapper.selectByUsername(SecurityFilter.getLoginUsername(webRequest.getNativeRequest(HttpServletRequest.class)));
         }catch (Throwable e){
             log.error("Failed to get user:",e);
             throw e;

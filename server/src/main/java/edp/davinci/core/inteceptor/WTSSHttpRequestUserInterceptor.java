@@ -58,6 +58,7 @@ public class WTSSHttpRequestUserInterceptor implements HttpRequestUserIntercepto
 
     @Override
     public String getUser(HttpServletRequest httpServletRequest) {
-        return httpServletRequest.getSession().getAttribute("username").toString();
+        Object username = httpServletRequest.getSession().getAttribute("username");
+        return username == null?null:username.toString();
     }
 }

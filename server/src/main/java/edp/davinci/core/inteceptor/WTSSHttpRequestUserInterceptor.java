@@ -45,12 +45,11 @@ public class WTSSHttpRequestUserInterceptor implements HttpRequestUserIntercepto
         logger.info("dss userTicket {} ", userTicket);
         if (userTicket != null && !userTicket.isEmpty()) {
             String username = SecurityFilter.getLoginUsername(httpServletRequest);
-            if(username == null){
+            if(username == null || username.isEmpty()){
                 return false;
             }
-            if(!username.equals(getUser(httpServletRequest))){
-                return false;
-            }
+            //说明已SSO统一登录
+            httpServletRequest.getSession().setAttribute("username", username);
             return true;
         }
         return false;
